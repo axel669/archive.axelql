@@ -10,26 +10,38 @@ const query = (args, returnType, resolver) => {
         returnType,
     }
 }
-const otherNested = `
-{
-    why bool
-}
-`
-const baseType = `
-{
-    planet ?string
-    ${otherNested}
-}
-`
 const aql = `
-query user (email string, withOrigins ?bool) -> {
+query hero (name string) -> {
+    name
+    type
+}
+
+heroes: hero({name: "test"}) {
+    name
+    age
+}
+
+collection wat {
+    query test (n number) -> number
+}
+query inherit () -> {
+    test ?string
+    {
+        mixin int
+    }
+    nested {
+        wat string
+    }
+}
+
+query user (email string) -> ?{
+    active bool
     name string
     email string
     ids ?[string]
-    origin [{
+    origin [?{
         name string
         server string
-        ${baseType}
     }]
 }
 query test (n int) -> int
@@ -41,9 +53,7 @@ query test2 (name string) -> ?{
         wat int
     }
 }
-collection wat {
-    query test (n number) -> number
-}
+
 `
 const aqlr = `
 user user({email: "cmorgan@skechers.com"
