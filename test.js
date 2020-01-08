@@ -1,73 +1,5 @@
 const types = require("./types.js")
 
-// const types = {
-//     int: {
-//         name: "int",
-//         check: value => {
-//             if (isInt(value) === false) {
-//                 throw TypeMismatch("int", value)
-//             }
-//         },
-//         mask: value => {
-//             types.int.check(value)
-//             return value
-//         }
-//     },
-//     string: {
-//         check: value => {
-//             if (isString(value) === false) {
-//                 throw TypeMismatch("string", value)
-//             }
-//         },
-//         mask: value => {
-//             types.string.check(value)
-//             return value
-//         }
-//     },
-//     array: baseType => {
-//         const check = value => {
-//             if (Array.isArray(value) === false) {
-//                 throw TypeMismatch("array", value)
-//             }
-//         }
-//     },
-//     composite: (source) => {
-//         const checkList = Object.entries(source)
-//         const check = value => {
-//             for (const [name, type] of checkList) {
-//                 type(value[name])
-//             }
-//             return value
-//         }
-//         const mask = value => checkList.reduce(
-//             (item, [name, type]) => {
-//                 item[name] = type(value[name])
-//                 return item
-//             },
-//             {}
-//         )
-//         return (value, filter) => {
-//             if (filter === true) {
-//                 return mask(value)
-//             }
-//             return check(value)
-//         }
-//     }
-// }
-// const notNull = baseType =>
-//     value => {
-//         if (value === null || value === undefined) {
-//             throw 1
-//         }
-//         return baseType(value)
-//     }
-// const nullable = baseType =>
-//     value => {
-//         if (value === null || value === undefined) {
-//             return null
-//         }
-//         return baseType(value)
-//     }
 const query = (args, returnType, resolver) => {
     return {
         resolver,
@@ -78,9 +10,30 @@ const query = (args, returnType, resolver) => {
         returnType,
     }
 }
+const otherNested = `
+{
+    why bool
+}
+`
+const baseType = `
+{
+    planet ?string
+    ${otherNested}
+}
+`
 const aql = `
-test query (n int) -> int
-test2 query (name string) -> ?{
+query user (email string, withOrigins ?bool) -> {
+    name string
+    email string
+    ids ?[string]
+    origin [{
+        name string
+        server string
+        ${baseType}
+    }]
+}
+query test (n int) -> int
+query test2 (name string) -> ?{
     name ?string
     age ?int
     breaks ?[int]
@@ -88,12 +41,12 @@ test2 query (name string) -> ?{
         wat int
     }
 }
-collection {
-    test query (n !number) -> !number
+collection wat {
+    query test (n number) -> number
 }
 `
 const aqlr = `
-nested collection.test({n: 100})
+user user({email: "cmorgan@skechers.com"
 global test2({name: "wat"}) {
     name
     age
@@ -139,6 +92,7 @@ const checkArgs = (expected, given) => {
     }
 }
 const execute = (source, args) => {
+    const errors = []
     try {
         checkArgs(source.args, args)
         const value = source.resolver(args)

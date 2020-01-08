@@ -14,11 +14,26 @@ const mask = (value, props) => props.reduce(
     {}
 )
 
-types.object = collection => {
-    const props = Object.entries(collection)
+types.object = (...props) => {
+    const propList = props.reduce(
+        (list, prop) => {
+            if (Array.isArray(prop) === true) {
+                return [
+                    ...list,
+                    prop
+                ]
+            }
+            return [
+                ...list,
+                ...Object.entries(prop),
+            ]
+        },
+        []
+    )
+    // const props = Object.entries(collection)
     return {
         name: "object",
-        check: value => check(value, props),
-        mask: value => mask(value, props),
+        check: value => check(value, propList),
+        mask: value => mask(value, propList),
     }
 }
