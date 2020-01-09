@@ -6,9 +6,11 @@ const check = (value, props) => {
         type.check(value[name])
     }
 }
-const mask = (value, props) => props.reduce(
+const mask = (value, props, args, params) => props.reduce(
     (item, [name, type]) => {
-        item[name] = type.mask(value[name])
+        if (params[name] !== undefined) {
+            item[name] = type.mask(value[name], args, params[name])
+        }
         return item
     },
     {}
@@ -34,6 +36,11 @@ types.object = (...props) => {
     return {
         name: "object",
         check: value => check(value, propList),
-        mask: value => mask(value, propList),
+        mask: (resolver, args, params, context) => {
+            const value = (typeof resolver === "function")
+                ? resolver(args, context)
+                : resolver
+            return mask(value, propList, args, params, context)
+        },
     }
 }

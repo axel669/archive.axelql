@@ -12,7 +12,7 @@ Variable
     }
 
 Request
-	= name:Name _ ":" _ func:Name "(" args:JSONObject ")" _ params:RequestParams? {
+	= name:Name _ ":" _ func:FunctionName "(" args:JSONObject ")" _ params:RequestParams? {
     	return {
         	name,
             func,
@@ -23,13 +23,12 @@ Request
 
 RequestParams
 	= "{" _ params:(Name __ RequestParams? _)+ "}" {
-    	return params.map(
-        	param => {
-            	if (param[2] === null) {
-                	return param[0]
-                }
-                return [param[0], param[2]]
-            }
+    	return params.reduce(
+        	(p, [name, , subParams]) => {
+            	p[name] = subParams
+                return p
+            },
+        	{}
         )
 	}
 
@@ -54,6 +53,8 @@ JSONBool = "true" / "false"
 
 Name
 	= $([a-zA-Z] [a-zA-Z0-9\-_]*)
+FunctionName
+	= $(Name ("." Name)*)
 
 _ "whitespace"
 	= [ \t\n\r]*

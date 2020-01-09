@@ -1,0 +1,28 @@
+{
+  "name": "axelql",
+  "version": "0.1.0",
+  "description": "query api for servers and clients to ensure data is not accidentally leaked by the server and allows clients to request exact data subsets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-query-parser": "pegjs -o parsers/query.js grammars/query-lang.pegjs",
+    "build-schema-parser": "pegjs -o parsers/schema.js grammars/schema-lang.pegjs",
+    "build-parsers": "npm run build-query-parser && npm run build-schema-parser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axel669/AxelQL.git"
+  },
+  "keywords": [
+    "axelql"
+  ],
+  "author": "Axel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/axel669/AxelQL/issues"
+  },
+  "homepage": "https://github.com/axel669/AxelQL#readme",
+  "dependencies": {
+    "pegjs": "^0.10.0"
+  }
+}

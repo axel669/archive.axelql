@@ -1,13 +1,14 @@
 {
-	const types = {
-    	int: "int",
-        string: "string",
-        number: "number",
-        bool: "bool",
-        array: base => `[${base}]`,
-        object: (...props) => `{${props.map(p => p.join(": ")).join(", ")}}`,
-        nullable: base => `?${base}`,
-    }
+	// const types = {
+    // 	int: "int",
+    //     string: "string",
+    //     number: "number",
+    //     bool: "bool",
+    //     array: base => `[${base}]`,
+    //     object: (...props) => `{${props.map(p => p.join(": ")).join(", ")}}`,
+    //     nullable: base => `?${base}`,
+    // }
+    const types = require("../types.js")
 }
 
 API
@@ -17,9 +18,9 @@ API
 
 Definition = Query / Collection
 Query
-	= "query" __ name:Name __ "(" args:ArgList ")" _ "->" _ returnType:Type {
+	= type: ("query" / "mutate") __ name:Name __ "(" args:ArgList ")" _ "->" _ returnType:Type {
     	return {
-        	type: "query",
+        	type,
             name,
             args,
             returnType,

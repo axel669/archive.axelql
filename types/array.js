@@ -22,5 +22,10 @@ const mask = (value, baseType) => {
 types.array = baseType => ({
     name: `[${baseType.name}]`,
     check: value => check(value, baseType),
-    mask: value => mask(value, baseType),
+    mask: (resolver, args) => {
+        const value = (typeof resolver === "function")
+            ? resolver(args)
+            : resolver
+        return mask(value, baseType)
+    },
 })
