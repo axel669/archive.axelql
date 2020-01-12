@@ -1,5 +1,5 @@
-const types = require("./types.js")
-const buildQueryEngine = require("./build-query-engine.js")
+// const types = require("./types.js")
+const {buildQueryEngine} = require("./index.js")
 
 const wait = time => new Promise(
     resolve => setTimeout(resolve, time)
@@ -185,8 +185,8 @@ const main = async () => {
                 nums: {
                     fn: "math.exponent",
                     args: {
-                        n: 5,
-                        power: 3,
+                        // n: 5,
+                        // power: 3,
                         info: {n:0, power: 0},
                     },
                 },
