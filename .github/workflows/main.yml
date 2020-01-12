@@ -17,7 +17,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12
-        registry-url: https://registry.npmjs.org/:_authToken=${{secrets.npm_token}}
+        registry-url: "https://registry.npmjs.org/:_authToken=${{secrets.npm_token}}"
     - name: Set env
       run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
     - name: Setup Version
