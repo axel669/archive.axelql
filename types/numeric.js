@@ -1,11 +1,12 @@
 const types = require("./source.js")
+const resolveValue = require("./resolve-value.js")
 const TypeMismatch = require("../error/type-mismatch")
 
 const isInt = value => (
     typeof value === "number"
     && (value % 1) === 0
 )
-const check = value => {
+const checkInt = value => {
     if (isInt(value) === false) {
         throw TypeMismatch("int", value)
     }
@@ -20,22 +21,28 @@ const checkNumber = value => {
 
 types.int = {
     name: "int",
-    check,
-    mask: (resolver, args) => {
-        const value = (typeof resolver === "function")
-            ? resolver(args)
-            : resolver
-        check(value)
+    check: checkInt,
+    validate: (name, params) => {
+        if (params !== null) {
+            throw new Error(`Cannot request properties of int(${name})`)
+        }
+    },
+    mask: async (resolver, args, context) => {
+        const value = await resolveValue(resolver, args, context)
+        checkInt(value)
         return value
     },
 }
 types.number = {
     name: "number",
     check: checkNumber,
-    mask: (resolver, args) => {
-        const value = (typeof resolver === "function")
-            ? resolver(args)
-            : resolver
+    validate: (name, params) => {
+        if (params !== null) {
+            throw new Error(`Cannot request properties of number(${name})`)
+        }
+    },
+    mask: async (resolver, args, context) => {
+        const value = await resolveValue(resolver, args, context)
         checkNumber(value)
         return value
     },

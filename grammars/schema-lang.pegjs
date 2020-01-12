@@ -74,15 +74,33 @@ BaseType
     }
     / ObjectType
 ObjectType
-	= "{" _ props:(_ (Name __ Type / ObjectType) _)+ _ "}" {
+	= "{" _ props:(_ (Name __ Type / Mixin) _)+ _ "}" {
     	return types.object(
-        	...props.map(prop => {
-                if (Array.isArray(prop[1])) {
-                	return [prop[1][0], prop[1][2]]
-                }
-                return [prop[1]]
-            })
+        	...props.reduce(
+                (list, prop) => {
+                    if (typeof prop[1][0] === "string") {
+                    	return [
+                            ...list,
+                            [prop[1][0], prop[1][2]],
+                        ]
+                    }
+                    return [
+                        ...list,
+                        ...prop[1],
+                    ]
+                },
+                []
+            )
         )
+    }
+Mixin
+    = "{" _ props:(_ (Name __ Type / Mixin) _)+ _ "}" {
+        return props.map(prop => {
+            if (Array.isArray(prop[1])) {
+                return [prop[1][0], prop[1][2]]
+            }
+            return [prop[1]]
+        })
     }
 
 _ "whitespace"

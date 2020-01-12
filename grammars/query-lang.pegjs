@@ -22,10 +22,10 @@ Request
     }
 
 RequestParams
-	= "{" _ params:(Name __ RequestParams? _)+ "}" {
+	= "{" _ params:(Name (__ RequestParams)? _)+ "}" {
     	return params.reduce(
-        	(p, [name, , subParams]) => {
-            	p[name] = subParams
+        	(p, [name, subParams]) => {
+            	p[name] = subParams && subParams[1]
                 return p
             },
         	{}
