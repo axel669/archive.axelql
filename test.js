@@ -1,137 +1,5 @@
 const types = require("./types.js")
-
-// const schema = require("./parsers/schema.js")
-// const query = require("./parsers/query.js")
-
 const buildQueryEngine = require("./build-query-engine.js")
-
-const aql = `
-query hero (name string) -> {
-    name
-    type
-}
-
-heroes: hero({name: "test"}) {
-    name
-    age
-}
-
-collection wat {
-    query test (n number) -> number
-}
-query inherit () -> {
-    test ?string
-    {
-        mixin int
-    }
-    nested {
-        wat string
-    }
-}
-
-query user (email string) -> ?{
-    active bool
-    name string
-    email string
-    ids ?[string]
-    origin [?{
-        name string
-        server string
-    }]
-}
-query test (n int) -> int
-query test2 (name string) -> ?{
-    name ?string
-    age ?int
-    breaks ?[int]
-    info ?{
-        wat int
-    }
-}
-`
-const aqlr = `
-user user({email: "cmorgan@skechers.com"})
-global test2({name: "wat"}) {
-    name
-    age
-    breaks
-    info
-}
-`
-// const test = genquery(
-//     {
-//         n: types.int,
-//     },
-//     types.array(
-//         types.nullable(types.int)
-//         // types.int
-//     ),
-//     args => [args.n ** 2, null]
-// )
-// const custom = genquery(
-//     {
-//         name: types.string,
-//     },
-//     types.object({
-//         name: types.nullable(types.string),
-//         age: types.nullable(types.int),
-//         breaks: types.nullable(
-//             types.array(types.int)
-//         ),
-//         info: types.object({
-//             planet: types.string,
-//             orbitDist: types.number,
-//         }),
-//     }),
-//     (args) => ({
-//         name: args.name,
-//         age: 1000,
-//         breaks: [1, 2, 3, 4],
-//         info: {
-//             planet: "Earth C137",
-//             orbitDist: 1.01,
-//         },
-//     })
-// )
-// console.log(test)
-// console.log(
-//     execute(test, {n: 5}, {})
-// )
-//
-// console.log(
-//     execute(
-//         custom,
-//         {
-//             name: "wat",
-//         },
-//         {
-//             name: null,
-//             breaks: null,
-//             info: {
-//                 // planet: null,
-//                 orbitDist: null,
-//             },
-//         }
-//     )
-// )
-
-// const watQuery = query.parse()
-// console.log(watQuery)
-
-// const watConstruct = genquery(
-//     wat[1].args,
-//     wat[1].returnType,
-//     (args, context) => {
-//         return {
-//             name: args.name,
-//             email: args.email,
-//             id: () => Math.random().toString(16),
-//         }
-//     }
-// )
-// console.log(
-//     execute(watConstruct, watQuery[0].args, watQuery[0].params, null)
-// )
 
 const wait = time => new Promise(
     resolve => setTimeout(resolve, time)
@@ -166,7 +34,6 @@ const nmatch = (a, b) => (
 const resolvers = {
     "math.square": ({n}) => n ** 2,
     "math.squareList": async args => {
-        // await wait(1000)
         return args.numbers.map(n => n ** 2)
     },
     "math.exponent": ({info}) => info.n ** info.power,
@@ -188,7 +55,6 @@ const resolvers = {
         for (const [id, user] of Object.entries(dataSource)) {
             if (nmatch(user.email, args.email) || nmatch(user.name, args.name)) {
                 const userResult = {id, ...user}
-                // console.log(userResult)
                 return userResult
             }
         }
@@ -224,14 +90,8 @@ const serverSchema = `
     mutate createUser (email string, name string) -> ${userSchema}
 `
 
-// console.log(serverSchema)
 
 const engine = buildQueryEngine(resolvers, serverSchema)
-
-// const stuff = makeQuerySources(resolvers, wat)
-
-// console.log(stuff)
-// console.log(watQuery)
 
 const formatParams = params => {
     if (params === null || params === undefined) {
