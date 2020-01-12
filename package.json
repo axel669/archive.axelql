@@ -22,7 +22,14 @@
     "url": "https://github.com/axel669/AxelQL/issues"
   },
   "homepage": "https://github.com/axel669/AxelQL#readme",
-  "dependencies": {
+  "devDependencies": {
     "pegjs": "^0.10.0"
-  }
+  },
+  "files": [
+    "build-query-engine.js",
+    "types.js",
+    "index.js",
+    "/parsers",
+    "/types"
+  ]
 }
