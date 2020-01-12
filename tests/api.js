@@ -8,6 +8,11 @@ const apiSchema = `
             token ?string
             channel ?string
         }
+
+        query list () -> [{
+            id string
+            wat string
+        }]
     }
 `
 const aqlResolvers = {
@@ -19,23 +24,24 @@ const aqlResolvers = {
         return {
             exists: false,
         }
-    }
+    },
+    "botSettings.list": () => [
+        {id: "hi", wat: "wat"}
+    ]
 }
 const aqlAPI = buildQueryEngine(aqlResolvers, apiSchema)
 
 const query = `
-botSettings: botSettings.load({"password": "test"}) {
-    exists
-    name
-    token
-    channel
+list: botSettings.list({}) {
+    id
+    wat
 }
 `
 
 const main = async () => {
     const result = await aqlAPI.query(query, {})
 
-    console.log(result)
+    console.log(result.data)
 }
 
 main()

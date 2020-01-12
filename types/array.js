@@ -15,10 +15,10 @@ const check = (value, baseType) => {
         }
     }
 }
-const mask = async (value, baseType) => {
+const mask = async (value, baseType, args, context) => {
     isArray(value, baseType)
     const masked = await Promise.all(
-        value.map(item => baseType.mask(item))
+        value.map(item => baseType.mask(item, args, context))
     )
     return masked
 }
@@ -27,12 +27,13 @@ types.array = baseType => ({
     name: `[${baseType.name}]`,
     check: value => check(value, baseType),
     validate: (name, params) => {
-        if (params !== null) {
-            throw new Error(`Cannot request properties of array(${name})`)
-        }
+        // if (params !== null) {
+        //     throw new Error(`Cannot request properties of array(${name})`)
+        // }
+        baseType.validate(name, params)
     },
     mask: async (resolver, args, context) => {
         const value = await resolveValue(resolver, args, context)
-        return mask(value, baseType)
+        return mask(value, baseType, args, context)
     },
 })
