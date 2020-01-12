@@ -1,5 +1,5 @@
 // const types = require("./types.js")
-const {buildQueryEngine} = require("./index.js")
+const {buildQueryEngine} = require("../index.js")
 
 const wait = time => new Promise(
     resolve => setTimeout(resolve, time)

@@ -1,6 +1,6 @@
 {
   "name": "axelql",
-  "version": "1.x",
+  "version": "1.0.0-alpha.2",
   "description": "query api for servers and clients to ensure data is not accidentally leaked by the server and allows clients to request exact data subsets",
   "main": "index.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "types.js",
     "index.js",
     "/parsers",
-    "/types"
+    "/types",
+    "/error"
   ]
 }
