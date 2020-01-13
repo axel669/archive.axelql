@@ -95,7 +95,10 @@ const processRequest = async (queryString, source, context) => {
             )
         }
         catch (error) {
-            result.errors[query.name] = error
+            result.errors[query.name] = {
+                message: error.message,
+                stack: error.stack,
+            }
         }
     }
 
