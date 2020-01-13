@@ -23,4 +23,5 @@ types.bool = {
     check,
     validate,
     mask,
+    toJSON: () => ({type: "bool"})
 }

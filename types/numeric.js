@@ -32,6 +32,7 @@ types.int = {
         checkInt(value)
         return value
     },
+    toJSON: () => ({type: "int"}),
 }
 types.number = {
     name: "number",
@@ -46,4 +47,5 @@ types.number = {
         checkNumber(value)
         return value
     },
+    toJSON: () => ({type: "number"}),
 }

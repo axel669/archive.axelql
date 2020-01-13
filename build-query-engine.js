@@ -76,7 +76,67 @@ const validate = (queryList, source) => {
         info.returnType.validate(`${query.func}()`, query.params)
     }
 }
-const processRequest = async (queryString, source, context) => {
+const parallelExecute = (queries, source, context) => Promise.all(
+    queries.map(
+        async query => {
+            const queryContext = {...context}
+            try {
+                return [
+                    query.name,
+                    "data",
+                    await execute(
+                        source[query.func],
+                        query.args,
+                        query.params,
+                        queryContext
+                    )
+                ]
+            }
+            catch (error) {
+                return [
+                    query.name,
+                    "error",
+                    {
+                        message: error.message,
+                        stack: error.stack,
+                    }
+                ]
+            }
+        }
+    )
+)
+const serialExecute = async (queries, source, context) => {
+    const results = []
+
+    for (const query of queries) {
+        const queryContext = {...context}
+        try {
+            results.push([
+                query.name,
+                "data",
+                await execute(
+                    source[query.func],
+                    query.args,
+                    query.params,
+                    queryContext
+                )
+            ])
+        }
+        catch (error) {
+            results.push([
+                query.name,
+                "error",
+                {
+                    message: error.message,
+                    stack: error.stack,
+                }
+            ])
+        }
+    }
+
+    return results
+}
+const processRequest = async (queryString, source, context, parallel) => {
     const parsedQuery = query.parse(queryString)
 
     validate(parsedQuery, source)
@@ -85,24 +145,17 @@ const processRequest = async (queryString, source, context) => {
         data: {},
         errors: {},
     }
-    for (const query of parsedQuery) {
-        try {
-            result.data[query.name] = await execute(
-                source[query.func],
-                query.args,
-                query.params,
-                context
-            )
-        }
-        catch (error) {
-            result.errors[query.name] = {
-                message: error.message,
-                stack: error.stack,
-            }
-        }
-    }
 
-    return result
+    const executor = parallel ? parallelExecute : serialExecute
+    const results = await executor(parsedQuery, source, context)
+
+    return results.reduce(
+        (result, [name, type, data]) => {
+            result[type][name] = data
+            return result
+        },
+        result
+    )
 }
 
 const tryMod = (func, mod) => {
@@ -137,13 +190,16 @@ const buildQueryEngine = (resolvers, schemaText) => {
         query: (queryString, context) => processRequest(
             stripComments(queryString),
             engine.query,
-            context
+            context,
+            true
         ),
         mutate: (queryString, context) => processRequest(
             stripComments(queryString),
             engine.mutate,
-            context
+            context,
+            false
         ),
+        schema: JSON.stringify(schemaSource),
     }
 }
 

@@ -36,4 +36,8 @@ types.array = baseType => ({
         const value = await resolveValue(resolver, args, context)
         return mask(value, baseType, args, params, context)
     },
+    toJSON: () => ({
+        baseType,
+        type: "array",
+    })
 })

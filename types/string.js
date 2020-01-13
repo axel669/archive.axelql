@@ -23,4 +23,5 @@ types.string = {
         check(value)
         return value
     },
+    toJSON: () => ({type: "string"}),
 }

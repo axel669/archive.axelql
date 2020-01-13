@@ -1,47 +1,75 @@
 const { buildQueryEngine } = require("../index.js")
 
-const apiSchema = `
+const wait = time => new Promise(
+    resolve => setTimeout(resolve, time)
+)
+
+const apiSchema = /* GraphQL */`
     collection botSettings {
-        query load (password string) -> {
+        mutate load (password string) -> {
             exists bool
             name ?string
             token ?string
             channel ?string
         }
 
-        query list () -> [{
+        mutate list () -> [{
             id string
             wat string
         }]
     }
+
+    query power (n number, exp number) -> number
 `
 const aqlResolvers = {
     "botSettings.load": async (args, context) => {
         const { password } = args
+        console.log(context)
 
-        console.log(password)
+        context.pw = password
+
+        // await wait(500)
+
+        // console.log(password)
 
         return {
-            exists: false,
+            exists: password === "wat",
+            name: async (args, context) => {
+                // await wait(500)
+                return context.pw
+            }
         }
     },
     "botSettings.list": () => [
         {id: "hi", wat: "wat"}
-    ]
+    ],
+    power: ({n, exp}) => n ** exp,
 }
 const aqlAPI = buildQueryEngine(aqlResolvers, apiSchema)
 
-const query = `
-list: botSettings.list({}) {
-    id
-    wat
+const query = /* GraphQL */`
+first: botSettings.load({"password": "wat"}) {
+    exists
+    name
+}
+second: botSettings.load({"password": "notwat"}) {
+    exists
+    # name
 }
 `
 
 const main = async () => {
-    const result = await aqlAPI.query(query, {})
+    const result = await aqlAPI.mutate(query, {})
 
-    console.log(result.data)
+    console.log(
+        JSON.stringify(
+            result.data,
+            null,
+            2
+        )
+    )
+
+    console.log(aqlAPI.schema)
 }
 
 main()
