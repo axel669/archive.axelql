@@ -15,10 +15,10 @@ const check = (value, baseType) => {
         }
     }
 }
-const mask = async (value, baseType, args, context) => {
+const mask = async (value, baseType, args, params, context) => {
     isArray(value, baseType)
     const masked = await Promise.all(
-        value.map(item => baseType.mask(item, args, context))
+        value.map(item => baseType.mask(item, args, params, context))
     )
     return masked
 }
@@ -32,8 +32,8 @@ types.array = baseType => ({
         // }
         baseType.validate(name, params)
     },
-    mask: async (resolver, args, context) => {
+    mask: async (resolver, args, params, context) => {
         const value = await resolveValue(resolver, args, context)
-        return mask(value, baseType, args, context)
+        return mask(value, baseType, args, params, context)
     },
 })
