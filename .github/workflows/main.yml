@@ -17,11 +17,11 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12
-        registry-url: "https://registry.npmjs.org"
     - name: Set env
       run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
     - name: Setup Version
       run: |
+        npm config set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN
         npm version $RELEASE_VERSION --no-git-tag
     - name: Push to NPM (alpha)
       if: "contains(github.ref, 'alpha')"
