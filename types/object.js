@@ -26,11 +26,19 @@ const validate = (propMap, name, params) => {
         propMap[name].validate(name, type)
     }
 }
-const mask = async (value, props, args, params, context) => {
+const mask = async (value, props, info) => {
+    const {args, params, context} = info
     const item = {}
     for (const [name, type] of props) {
         if (params[name] !== undefined) {
-            item[name] = await type.mask(value[name], args, params[name], context)
+            item[name] = await type.mask(
+                value[name],
+                {
+                    params: params[name],
+                    args,
+                    context
+                }
+            )
         }
     }
 
@@ -64,9 +72,9 @@ types.object = (...props) => {
         name: "object",
         check: value => check(value, propList, propMap),
         validate: (name, params) => validate(propMap, name, params),
-        mask: async (resolver, args, params, context) => {
-            const value = await resolveValue(resolver, args, context)
-            return mask(value, propList, args, params, context)
+        mask: async (item, info) => {
+            const value = await resolveValue(item, info)
+            return mask(value, propList, info)
         },
         toJSON: () => ({
             type: "object",

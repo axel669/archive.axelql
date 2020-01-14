@@ -8,16 +8,16 @@ const isNulled = value => (
 )
 const check = (value, baseType) =>
     isNulled(value) ? null : baseType.check(value)
-const mask = (value, baseType, args, params, context) =>
-    isNulled(value) ? null : baseType.mask(value, args, params, context)
+const mask = (value, baseType, info) =>
+    isNulled(value) ? null : baseType.mask(value, info)
 
 types.nullable = baseType => ({
     name: `?${baseType.name}`,
     check: value => check(value, baseType),
     validate: (name, params) => baseType.validate(name, params),
-    mask: async (resolver, args, params, context) => {
-        const value = await resolveValue(resolver, args, context)
-        return mask(value, baseType, args, params, context)
+    mask: async (item, info) => {
+        const value = await resolveValue(item, info)
+        return mask(value, baseType, info)
     },
     toJSON: () => ({
         baseType,

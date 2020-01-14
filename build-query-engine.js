@@ -62,14 +62,31 @@ const checkArgs = (expected, named, given) => {
         type.check(given[name])
     }
 }
-const execute = (source, args, params, context) => {
-    checkArgs(source.args, source.argNames, args)
-    return source.returnType.mask(source.resolver, args, params, context)
+const execute = async (name, source, info) => {
+    checkArgs(source.args, source.argNames, info.args)
+    try {
+        return [
+            name,
+            "data",
+            await source.returnType.mask(source.resolver, info)
+        ]
+    }
+    catch (error) {
+        return [
+            name,
+            "error",
+            {
+                message: error.message,
+                stack: error.stack,
+            }
+        ]
+    }
 }
 
 const validate = (queryList, source) => {
     for (const query of queryList) {
         const info = source[query.func]
+        console.log(query)
         if (info === undefined) {
             throw new Error(`No resolver found for ${query.func}`)
         }
@@ -78,30 +95,18 @@ const validate = (queryList, source) => {
 }
 const parallelExecute = (queries, source, context) => Promise.all(
     queries.map(
-        async query => {
+        query => {
             const queryContext = {...context}
-            try {
-                return [
-                    query.name,
-                    "data",
-                    await execute(
-                        source[query.func],
-                        query.args,
-                        query.params,
-                        queryContext
-                    )
-                ]
+            const info = {
+                args: query.args,
+                params: query.params,
+                context: queryContext,
             }
-            catch (error) {
-                return [
-                    query.name,
-                    "error",
-                    {
-                        message: error.message,
-                        stack: error.stack,
-                    }
-                ]
-            }
+            return execute(
+                query.name,
+                source[query.func],
+                info
+            )
         }
     )
 )
@@ -110,28 +115,18 @@ const serialExecute = async (queries, source, context) => {
 
     for (const query of queries) {
         const queryContext = {...context}
-        try {
-            results.push([
-                query.name,
-                "data",
-                await execute(
-                    source[query.func],
-                    query.args,
-                    query.params,
-                    queryContext
-                )
-            ])
+        const info = {
+            args: query.args,
+            params: query.params,
+            context: queryContext,
         }
-        catch (error) {
-            results.push([
+        results.push(
+            await execute(
                 query.name,
-                "error",
-                {
-                    message: error.message,
-                    stack: error.stack,
-                }
-            ])
-        }
+                source[query.func],
+                info
+            )
+        )
     }
 
     return results
@@ -139,18 +134,19 @@ const serialExecute = async (queries, source, context) => {
 const processRequest = async (queryString, source, context, parallel) => {
     const parsedQuery = query.parse(queryString)
 
-    validate(parsedQuery, source)
+    validate(parsedQuery.queries, source)
 
     const result = {
         data: {},
-        errors: {},
+        error: {},
     }
 
     const executor = parallel ? parallelExecute : serialExecute
-    const results = await executor(parsedQuery, source, context)
+    const results = await executor(parsedQuery.queries, source, context)
 
     return results.reduce(
         (result, [name, type, data]) => {
+            console.log(name, type)
             result[type][name] = data
             return result
         },

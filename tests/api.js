@@ -22,9 +22,11 @@ const apiSchema = /* GraphQL */`
     query power (n number, exp number) -> number
 `
 const aqlResolvers = {
-    "botSettings.load": async (args, context) => {
+    "botSettings.load": async ({args, context, params}) => {
         const { password } = args
         console.log(context)
+        params.test = "wat"
+        console.log(params)
 
         context.pw = password
 
@@ -34,7 +36,7 @@ const aqlResolvers = {
 
         return {
             exists: password === "wat",
-            name: async (args, context) => {
+            name: async ({args, context}) => {
                 // await wait(500)
                 return context.pw
             }
@@ -48,13 +50,14 @@ const aqlResolvers = {
 const aqlAPI = buildQueryEngine(aqlResolvers, apiSchema)
 
 const query = /* GraphQL */`
+$test = {"password": "wat"}
 first: botSettings.load({"password": "wat"}) {
     exists
     name
 }
 second: botSettings.load({"password": "notwat"}) {
     exists
-    # name
+    name
 }
 `
 
@@ -63,13 +66,13 @@ const main = async () => {
 
     console.log(
         JSON.stringify(
-            result.data,
+            result,
             null,
             2
         )
     )
 
-    console.log(aqlAPI.schema)
+    // console.log(aqlAPI.schema)
 }
 
 main()

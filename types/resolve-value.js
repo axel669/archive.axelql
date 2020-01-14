@@ -1,2 +1,2 @@
-module.exports = (value, args, context) =>
-    (typeof value === "function") ? value(args, context) : value
+module.exports = (value, info) =>
+    (typeof value === "function") ? value(info) : value

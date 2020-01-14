@@ -12,8 +12,8 @@ const validate = (name, params) => {
         throw new Error(`Cannot request properties of bool(${name})`)
     }
 }
-const mask = async (resolver, args, context) => {
-    const value = await resolveValue(resolver, args, context)
+const mask = async (item, info) => {
+    const value = await resolveValue(item, info)
     check(value)
     return value
 }

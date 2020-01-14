@@ -27,8 +27,8 @@ types.int = {
             throw new Error(`Cannot request properties of int(${name})`)
         }
     },
-    mask: async (resolver, args, context) => {
-        const value = await resolveValue(resolver, args, context)
+    mask: async (item, info) => {
+        const value = await resolveValue(item, info)
         checkInt(value)
         return value
     },
@@ -42,8 +42,8 @@ types.number = {
             throw new Error(`Cannot request properties of number(${name})`)
         }
     },
-    mask: async (resolver, args, context) => {
-        const value = await resolveValue(resolver, args, context)
+    mask: async (item, info) => {
+        const value = await resolveValue(item, info)
         checkNumber(value)
         return value
     },

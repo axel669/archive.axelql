@@ -1,13 +1,20 @@
 Input
 	= queries:(_ (Request / Variable) _)+ {
-    	return queries.map(q => q[1])
+    	return queries.reduce(
+			(info, [, item]) => {
+			},
+			{
+				queries: [],
+				vars: {}
+			}
+		)
     }
 
 Variable
-	= name:Name _ "=" _ value:JSON {
+	= name:JSONVariable _ "=" _ value:JSON {
     	return {
         	name,
-            value,
+            value: JSON.parse(value),
         }
     }
 
@@ -23,13 +30,15 @@ Request
 
 RequestParams
 	= "{" _ params:(Name (__ RequestParams)? _)+ "}" {
-    	return params.reduce(
-        	(p, [name, subParams]) => {
-            	p[name] = subParams && subParams[1]
-                return p
-            },
-        	{}
-        )
+    	return Object.freeze(
+			params.reduce(
+				(p, [name, subParams]) => {
+					p[name] = subParams && subParams[1]
+					return p
+				},
+				{}
+			)
+		)
 	}
 
 JSON
@@ -39,6 +48,7 @@ JSON
     / JSONNumber
     / JSONNull
     / JSONBool
+	/ JSONVariable
 JSONObject
 	= $("{" _ (JSONObjectEntry _ ("," _ JSONObjectEntry _)*)? "}")
 JSONObjectEntry = JSONString _ ":" _ JSON
@@ -50,6 +60,7 @@ JSONNumber
 	= $([0-9]+ ("." [0-9]+)? (("e" / "E") [0-9]+)?)
 JSONNull = "null"
 JSONBool = "true" / "false"
+JSONVariable = $("$" Name)
 
 Name
 	= $([a-zA-Z] [a-zA-Z0-9\-_]*)

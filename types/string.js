@@ -18,8 +18,8 @@ types.string = {
             throw new Error(`Cannot request properties of string(${name})`)
         }
     },
-    mask: async (resolver, args, context) => {
-        const value = await resolveValue(resolver, args, context)
+    mask: async (item, info) => {
+        const value = await resolveValue(item, info)
         check(value)
         return value
     },
