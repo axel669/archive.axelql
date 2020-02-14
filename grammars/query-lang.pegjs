@@ -1,31 +1,25 @@
-Input
-	= queries:(_ (Request / Variable) _)+ {
-    	return queries.reduce(
-			(info, [, item]) => {
-			},
-			{
-				queries: [],
-				vars: {}
-			}
-		)
-    }
+{
+	const variables = arguments[2] || {}
+}
 
-Variable
-	= name:JSONVariable _ "=" _ value:JSON {
-    	return {
-        	name,
-            value: JSON.parse(value),
-        }
-    }
+Input
+	= requests:(_ Request _)+ {
+		return requests.map(req => req[1])
+	}
 
 Request
-	= name:Name _ ":" _ func:FunctionName "(" args:JSONObject ")" _ params:RequestParams? {
+	= name:Name _ ":" _ func:FunctionName "(" args:(JSON) ")" _ params:RequestParams? {
     	return {
         	name,
             func,
             params,
-            args: JSON.parse(args),
+            args,
         }
+    }
+
+Variable
+	= "$" name:Name {
+    	return {name}
     }
 
 RequestParams
@@ -50,17 +44,49 @@ JSON
     / JSONBool
 	/ JSONVariable
 JSONObject
-	= $("{" _ (JSONObjectEntry _ ("," _ JSONObjectEntry _)*)? "}")
-JSONObjectEntry = JSONString _ ":" _ JSON
+	= "{" _ "}" {
+		return {}
+	}
+	/ "{" _ head:JSONObjectEntry _ tail:("," _ JSONObjectEntry _)* "}" {
+		return [head, ...tail.map(t => t[2])].reduce(
+			(obj, {name, value}) => {
+				obj[name] = value
+				return obj
+			},
+			{}
+		)
+	}
+JSONObjectEntry
+	= name:(JSONString / Name) _ ":" _ value:JSON {
+		return {name, value}
+	}
 JSONArray
-	= $("[" _ (JSON _ ("," _ JSON _)*)? "]")
+	= "[" _ "]" {
+		return []
+	}
+	/ "[" _ head:JSON _ tail:("," _ JSON _)* "]" {
+		return [
+			head,
+			...tail.map(t => t[2])
+		]
+	}
 JSONString
-	= $('"' ([^"])* '"')
+	= json:$('"' ([^"])* '"') {
+		return JSON.parse(json)
+	}
 JSONNumber
-	= $([0-9]+ ("." [0-9]+)? (("e" / "E") [0-9]+)?)
-JSONNull = "null"
-JSONBool = "true" / "false"
-JSONVariable = $("$" Name)
+	= json:$([0-9]+ ("." [0-9]+)? (("e" / "E") [0-9]+)?) {
+		return JSON.parse(json)
+	}
+JSONNull = "null" {return null}
+JSONBool =
+	value:("true" / "false") {
+		return value === "true"
+	}
+JSONVariable
+	= "$" name:Name {
+		return variables[name]
+	}
 
 Name
 	= $([a-zA-Z] [a-zA-Z0-9\-_]*)

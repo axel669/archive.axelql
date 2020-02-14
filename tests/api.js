@@ -1,4 +1,4 @@
-const { buildQueryEngine } = require("../index.js")
+const {buildQueryEngine} = require("../index.js")
 
 const wait = time => new Promise(
     resolve => setTimeout(resolve, time)
@@ -24,9 +24,9 @@ const apiSchema = /* GraphQL */`
 const aqlResolvers = {
     "botSettings.load": async ({args, context, params}) => {
         const { password } = args
-        console.log(context)
+        // console.log(context)
         params.test = "wat"
-        console.log(params)
+        // console.log(params)
 
         context.pw = password
 
@@ -50,7 +50,6 @@ const aqlResolvers = {
 const aqlAPI = buildQueryEngine(aqlResolvers, apiSchema)
 
 const query = /* GraphQL */`
-$test = {"password": "wat"}
 first: botSettings.load({"password": "wat"}) {
     exists
     name
@@ -59,10 +58,25 @@ second: botSettings.load({"password": "notwat"}) {
     exists
     name
 }
+third: botSettings.load($test) {
+    exists
+    name
+}
+fourth: botSettings.load({password: $pw}) {
+    exists
+    name
+}
 `
 
 const main = async () => {
-    const result = await aqlAPI.mutate(query, {})
+    const result = await aqlAPI.mutate(
+        query,
+        {
+            test: {password: "wat"},
+            pw: "notwat",
+        },
+        {}
+    )
 
     console.log(
         JSON.stringify(

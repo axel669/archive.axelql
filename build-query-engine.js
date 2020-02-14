@@ -86,7 +86,7 @@ const execute = async (name, source, info) => {
 const validate = (queryList, source) => {
     for (const query of queryList) {
         const info = source[query.func]
-        console.log(query)
+        // console.log(query)
         if (info === undefined) {
             throw new Error(`No resolver found for ${query.func}`)
         }
@@ -131,10 +131,12 @@ const serialExecute = async (queries, source, context) => {
 
     return results
 }
-const processRequest = async (queryString, source, context, parallel) => {
-    const parsedQuery = query.parse(queryString)
+const processRequest = async (queryString, source, vars, context, parallel) => {
+    const parsedQuery = query.parse(queryString, {}, vars)
 
-    validate(parsedQuery.queries, source)
+    // console.log(parsedQuery)
+
+    validate(parsedQuery, source)
 
     const result = {
         data: {},
@@ -142,11 +144,11 @@ const processRequest = async (queryString, source, context, parallel) => {
     }
 
     const executor = parallel ? parallelExecute : serialExecute
-    const results = await executor(parsedQuery.queries, source, context)
+    const results = await executor(parsedQuery, source, context)
 
     return results.reduce(
         (result, [name, type, data]) => {
-            console.log(name, type)
+            // console.log(name, type)
             result[type][name] = data
             return result
         },
@@ -183,15 +185,17 @@ const buildQueryEngine = (resolvers, schemaText) => {
     const engine = compileQuerySources(resolvers, schemaSource)
 
     return {
-        query: (queryString, context) => processRequest(
+        query: (queryString, vars, context) => processRequest(
             stripComments(queryString),
             engine.query,
+            vars,
             context,
             true
         ),
-        mutate: (queryString, context) => processRequest(
+        mutate: (queryString, vars, context) => processRequest(
             stripComments(queryString),
             engine.mutate,
+            vars,
             context,
             false
         ),
