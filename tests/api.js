@@ -62,7 +62,7 @@ third: botSettings.load($test) {
     exists
     name
 }
-fourth: botSettings.load({password: $pw}) {
+fourth: botSettings.load(password: $pw) {
     exists
     name
 }

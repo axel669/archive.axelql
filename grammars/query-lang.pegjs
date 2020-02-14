@@ -8,7 +8,7 @@ Input
 	}
 
 Request
-	= name:Name _ ":" _ func:FunctionName "(" args:(JSON) ")" _ params:RequestParams? {
+	= name:Name _ ":" _ func:FunctionName "(" args:JSONArgs ")" _ params:RequestParams? {
     	return {
         	name,
             func,
@@ -35,6 +35,10 @@ RequestParams
 		)
 	}
 
+JSONArgs
+	= JSON
+	/ JSONEntries
+
 JSON
 	= JSONObject
     / JSONArray
@@ -47,7 +51,9 @@ JSONObject
 	= "{" _ "}" {
 		return {}
 	}
-	/ "{" _ head:JSONObjectEntry _ tail:("," _ JSONObjectEntry _)* "}" {
+	/ "{" _ value:JSONEntries "}" {return value}
+JSONEntries
+	= head:JSONObjectEntry _ tail:("," _ JSONObjectEntry _)* {
 		return [head, ...tail.map(t => t[2])].reduce(
 			(obj, {name, value}) => {
 				obj[name] = value
