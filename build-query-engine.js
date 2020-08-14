@@ -131,10 +131,8 @@ const serialExecute = async (queries, source, context) => {
 
     return results
 }
-const processRequest = async (queryString, source, vars, context, parallel) => {
-    const parsedQuery = query.parse(queryString, {}, vars)
-
-    // console.log(parsedQuery)
+const processRequest = async (queryString, source, context, parallel) => {
+    const parsedQuery = query.parse(queryString, context)
 
     validate(parsedQuery, source)
 
@@ -148,7 +146,6 @@ const processRequest = async (queryString, source, vars, context, parallel) => {
 
     return results.reduce(
         (result, [name, type, data]) => {
-            // console.log(name, type)
             result[type][name] = data
             return result
         },
@@ -185,21 +182,19 @@ const buildQueryEngine = (resolvers, schemaText) => {
     const engine = compileQuerySources(resolvers, schemaSource)
 
     return {
-        query: (queryString, vars, context) => processRequest(
+        query: (queryString, context) => processRequest(
             stripComments(queryString),
             engine.query,
-            vars,
             context,
             true
         ),
-        mutate: (queryString, vars, context) => processRequest(
+        mutate: (queryString, context) => processRequest(
             stripComments(queryString),
             engine.mutate,
-            vars,
             context,
             false
         ),
-        schema: JSON.stringify(schemaSource),
+        schema: schemaSource,
     }
 }
 

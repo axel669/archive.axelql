@@ -1,5 +1,5 @@
 {
-	const variables = arguments[2] || {}
+	const variables = arguments[1] || {}
 }
 
 Input

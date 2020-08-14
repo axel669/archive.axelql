@@ -1624,7 +1624,7 @@ function peg$parse(input, options) {
   }
 
 
-  	const variables = arguments[2] || {}
+  	const variables = arguments[1] || {}
 
 
   peg$result = peg$startRuleFunction();

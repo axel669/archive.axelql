@@ -6,14 +6,14 @@ const wait = time => new Promise(
 
 const apiSchema = /* GraphQL */`
     collection botSettings {
-        mutate load (password string) -> {
+        query load (password string) -> {
             exists bool
             name ?string
             token ?string
             channel ?string
         }
 
-        mutate list () -> [{
+        query list () -> [{
             id string
             wat string
         }]
@@ -69,7 +69,8 @@ fourth: botSettings.load(password: $pw) {
 `
 
 const main = async () => {
-    const result = await aqlAPI.mutate(
+    console.time("speed")
+    const result = await aqlAPI.query(
         query,
         {
             test: {password: "wat"},
@@ -77,6 +78,7 @@ const main = async () => {
         },
         {}
     )
+    console.timeEnd("speed")
 
     console.log(
         JSON.stringify(
@@ -86,7 +88,7 @@ const main = async () => {
         )
     )
 
-    // console.log(aqlAPI.schema)
+    console.log(JSON.stringify(aqlAPI.schema, null, 2))
 }
 
 main()
